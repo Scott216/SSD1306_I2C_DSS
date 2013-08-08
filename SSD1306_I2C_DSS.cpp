@@ -358,10 +358,18 @@ void Adafruit_SSD1306::display(void) {
                            // D/C bit = 1,   tells LCD the following data bytes should be stored at the GDDRAM. 
                            // The GDDRAM column address pointer will be increased by one automatically after each data write. 
   // Send buffer to LCD
-  for (uint16_t i = 0; i < (SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8); i++) {
-      I2c.write(_i2caddr, control, buffer[i]);
+  for (uint16_t i = 0; i < (SSD1306_LCDWIDTH * SSD1306_LCDHEIGHT / 8); i++) {
+    I2c.write(_i2caddr, control, buffer[i]);
   }
 
+  // Not sure why this is needed for 128x32 OLED.  Fill unused section of buffer with 0x00
+  if (SSD1306_LCDHEIGHT == 32) {
+    for (uint16_t i = 0; i < (SSD1306_LCDWIDTH * SSD1306_LCDHEIGHT / 8); i++) {
+      I2c.write(_i2caddr, control, (uint8_t)0x00);
+    }
+  }
+  
+  
   TWBR = twbrbackup;
 } // display()
 
