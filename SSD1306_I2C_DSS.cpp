@@ -1,8 +1,10 @@
 /*
 This library is a modified version of Adafruit Adafruit_SSD1306
 http://github.com/adafruit/Adafruit_SSD1306
+It's made to work with Adafruit 32x128 & 64x128 monochrome OLEDs via I2C
 
 Modified by Scott Goldthwaite, Aug 4, 2013
+11/9/13 - updated to work with changes made to Adafruit_GFX.h library
 
 SPI has been removed and I2C communication doesn't use the wire.h library
 instead it uses an I2C library from DSS Circuits.  The DSS library is faster and allows for timeouts
@@ -10,38 +12,14 @@ Ref: http://dsscircuits.com/articles/arduino-i2c-master-library.html
 
 */
 
-/*********************************************************************
-This is a library for our Monochrome OLEDs based on SSD1306 drivers
-
-  Pick one up today in the adafruit shop!
-  ------> http://www.adafruit.com/category/63_98
-
-These displays use SPI to communicate, 4 or 5 pins are required to  
-interface
-
-Adafruit invests time and resources providing this open source code, 
-please support Adafruit and open-source hardware by purchasing 
-products from Adafruit!
-
-Written by Limor Fried/Ladyada  for Adafruit Industries.  
-BSD license, check license.txt for more information
-All text above, and the splash screen must be included in any redistribution
-*********************************************************************/
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <stdlib.h>
-#include <I2C.h>  // http://dsscircuits.com/articles/arduino-i2c-master-library.html
-
-
-#include "Adafruit_GFX.h"      // http://github.com/adafruit/Adafruit-GFX-Library
+#include <I2C.h>              // http://dsscircuits.com/articles/arduino-i2c-master-library.html
+#include "Adafruit_GFX.h"     // http://github.com/adafruit/Adafruit-GFX-Library
 #include "SSD1306_I2C_DSS.h"  // http://github.com/Scott216/SSD1306_I2C_DSS
-#include "glcdfont.c"      
-
-// a 5x7 font table
-extern uint8_t PROGMEM font[];
 
 // the memory buffer for the LCD
-
 static uint8_t buffer[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8] = { 
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -112,7 +90,6 @@ static uint8_t buffer[SSD1306_LCDHEIGHT * SSD1306_LCDWIDTH / 8] = {
 };
 
 
-
 // the most basic function, set a single pixel
 void Adafruit_SSD1306::drawPixel(int16_t x, int16_t y, uint16_t color) {
   if ((x < 0) || (x >= width()) || (y < 0) || (y >= height()))
@@ -143,27 +120,23 @@ void Adafruit_SSD1306::drawPixel(int16_t x, int16_t y, uint16_t color) {
 
 
 // initializer for I2C 
-Adafruit_SSD1306::Adafruit_SSD1306(int8_t resetpin) {
+// Note: for Xcode to compile this, you need to include SPI library in makefile
+Adafruit_SSD1306::Adafruit_SSD1306(int8_t resetpin) : 
+Adafruit_GFX(SSD1306_LCDWIDTH, SSD1306_LCDHEIGHT) {
   rst = resetpin;
   _i2CtimeOut = 0;  // timeout disabled
 }  // Adafruit_SSD1306()
 
 
-// initializer for I2C with timout
-Adafruit_SSD1306::Adafruit_SSD1306(int8_t resetpin, uint32_t timeout) {
+// initializer for I2C with timeout
+Adafruit_SSD1306::Adafruit_SSD1306(int8_t resetpin, uint32_t timeout) :
+Adafruit_GFX(SSD1306_LCDWIDTH, SSD1306_LCDHEIGHT) {
   rst = resetpin;
   _i2CtimeOut = timeout;  // timeout in mS
 }  // Adafruit_SSD1306()
   
 
 void Adafruit_SSD1306::begin(uint8_t vccstate, uint8_t i2caddr) {
-#ifdef SSD1306_128_64
-  constructor(128, 64);
-#endif
-#ifdef SSD1306_128_32
-  constructor(128, 32);
-#endif
-
   _i2caddr = i2caddr;
 
   // I2C Init
@@ -258,6 +231,7 @@ void Adafruit_SSD1306::begin(uint8_t vccstate, uint8_t i2caddr) {
 }
 
 
+// Invert so black text on white background
 void Adafruit_SSD1306::invertDisplay(uint8_t i) {
   if (i) {
     ssd1306_command(SSD1306_INVERTDISPLAY);
@@ -266,10 +240,12 @@ void Adafruit_SSD1306::invertDisplay(uint8_t i) {
   }
 } // invertDisplay()
 
+
 void Adafruit_SSD1306::ssd1306_command(uint8_t c) { 
     uint8_t control = 0x00;   // Co = 0, D/C = 0
     I2c.write( _i2caddr, control, c);
 } // ssd1306_command()
+
 
 // startscrollright
 // Activate a right handed scroll for rows start through stop
@@ -286,6 +262,7 @@ void Adafruit_SSD1306::startscrollright(uint8_t start, uint8_t stop){
 	ssd1306_command(SSD1306_ACTIVATE_SCROLL);
 } // startscrollright()
 
+
 // startscrollleft
 // Activate a right handed scroll for rows start through stop
 // Hint, the display is 16 rows tall. To scroll the whole display, run:
@@ -300,6 +277,7 @@ void Adafruit_SSD1306::startscrollleft(uint8_t start, uint8_t stop){
 	ssd1306_command(0XFF);
 	ssd1306_command(SSD1306_ACTIVATE_SCROLL);
 } // startscrollleft()
+
 
 // startscrolldiagright
 // Activate a diagonal scroll for rows start through stop
@@ -318,6 +296,7 @@ void Adafruit_SSD1306::startscrolldiagright(uint8_t start, uint8_t stop){
 	ssd1306_command(SSD1306_ACTIVATE_SCROLL);
 } // startscrolldiagright()
 
+
 // startscrolldiagleft
 // Activate a diagonal scroll for rows start through stop
 // Hint, the display is 16 rows tall. To scroll the whole display, run:
@@ -335,9 +314,11 @@ void Adafruit_SSD1306::startscrolldiagleft(uint8_t start, uint8_t stop){
 	ssd1306_command(SSD1306_ACTIVATE_SCROLL);
 } // startscrolldiagleft()
 
+
 void Adafruit_SSD1306::stopscroll(void){
 	ssd1306_command(SSD1306_DEACTIVATE_SCROLL);
 } // stopscroll()_
+
 
 void Adafruit_SSD1306::ssd1306_data(uint8_t c) {
     uint8_t control = 0x40;   // Co = 0, D/C = 1
@@ -363,15 +344,16 @@ void Adafruit_SSD1306::display(void) {
   }
 
   // Not sure why this is needed for 128x32 OLED.  Fill unused section of buffer with 0x00
+  // See this post for fix to this: http://github.com/adafruit/Adafruit_SSD1306/issues/13
   if (SSD1306_LCDHEIGHT == 32) {
     for (uint16_t i = 0; i < (SSD1306_LCDWIDTH * SSD1306_LCDHEIGHT / 8); i++) {
       I2c.write(_i2caddr, control, (uint8_t)0x00);
     }
   }
   
-  
   TWBR = twbrbackup;
 } // display()
+
 
 // clear everything
 void Adafruit_SSD1306::clearDisplay(void) {
