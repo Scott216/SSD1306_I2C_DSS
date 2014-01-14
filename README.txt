@@ -1,9 +1,9 @@
 This is a library for Adafruit Monochrome OLEDs based on SSD1306 drivers
 It's a forked from http://github.com/adafruit/Adafruit_SSD1306
 
-This version removes SPI support and doesn't use the wire.h library to communicate over I2C.  Instead it uses a library from DSS Circuits: http://dsscircuits.com/articles/arduino-i2c-master-library.html
+This version removes SPI support and doesn't use the wire.h library to communicate over I2C.  Instead it uses I2C.h library from DSS Circuits: http://dsscircuits.com/articles/arduino-i2c-master-library.html
 
-The I2C.h library from DSS is faster then wire.h, uses less memory and supports timeout.
+The I2C.h library from DSS is faster then wire.h, uses less memory and supports timeouts.
 
 This version has only been tested with the 128x32 I2C OLED, not the 128x64 version
 
@@ -13,7 +13,7 @@ Adafruit invests time and resources providing this open source code, please supp
 128 x 64 OLED http://www.adafruit.com/products/326
 
 
-Original library Written by Limor Fried/Ladyada  for Adafruit Industries.  
+Original library Written by Limor Fried/Ladyada  for Adafruit Industries
 Scrolling code contributed by Michael Gregg
 This version was modified by Scott Goldthwaite 
 
