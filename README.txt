@@ -19,8 +19,4 @@ This version was modified by Scott Goldthwaite
 
 BSD license, check license.txt for more information All text above must be included in any redistribution
 
-To download. click the DOWNLOADS button in the top right corner, rename the uncompressed folder SSD1306_I2C_DSS. Check that the SSD1306_I2C_DSS folder contains SSD1306_I2C_DSS.cpp and SSD1306_I2C_DSS.h
-
-Place the SSD1306_I2C_DSS library folder your <arduinosketchfolder>/libraries/ folder. You may need to create the libraries subfolder if its your first library. Restart the IDE.
-
 You will also have to download the Adafruit GFX Graphics core which does all the circles, text, rectangles, etc. You can get it from http://github.com/adafruit/Adafruit-GFX-Library and download/install that library as well 
