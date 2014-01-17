@@ -327,10 +327,14 @@ void Adafruit_SSD1306::ssd1306_data(uint8_t c) {
 
 
 void Adafruit_SSD1306::display(void) {
-  ssd1306_command(SSD1306_SETLOWCOLUMN | 0x0);   // low col = 0
-  ssd1306_command(SSD1306_SETHIGHCOLUMN | 0x0);  // hi col = 0
-  ssd1306_command(SSD1306_SETSTARTLINE | 0x0);   // line #0
-
+  ssd1306_command(SSD1306_COLUMNADDR);
+  ssd1306_command(0);                // Column start address (0 = reset)
+  ssd1306_command(127);              // Column end address (127 = reset)
+  ssd1306_command(SSD1306_PAGEADDR);
+  ssd1306_command(0);                // Page start address (0 = reset)
+  ssd1306_command((SSD1306_LCDHEIGHT == 64) ? 7 : 3); // Page end address
+  
+  
   // save I2C bitrate
   uint8_t twbrbackup = TWBR;
   TWBR = 12; // upgrade to 400KHz!
@@ -342,15 +346,7 @@ void Adafruit_SSD1306::display(void) {
   for (uint16_t i = 0; i < (SSD1306_LCDWIDTH * SSD1306_LCDHEIGHT / 8); i++) {
     I2c.write(_i2caddr, control, buffer[i]);
   }
-
-  // Not sure why this is needed for 128x32 OLED.  Fill unused section of buffer with 0x00
-  // See this post for fix to this: http://github.com/adafruit/Adafruit_SSD1306/issues/13
-  if (SSD1306_LCDHEIGHT == 32) {
-    for (uint16_t i = 0; i < (SSD1306_LCDWIDTH * SSD1306_LCDHEIGHT / 8); i++) {
-      I2c.write(_i2caddr, control, (uint8_t)0x00);
-    }
-  }
-  
+	  
   TWBR = twbrbackup;
 } // display()
 
